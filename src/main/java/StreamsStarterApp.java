@@ -29,8 +29,9 @@ public class StreamsStarterApp {
                 .groupByKey()
                 .count(Named.as("Counts"));
         wordCounts.toStream().to("word-count-output", Produced.with(Serdes.String(), Serdes.Long()));
-        try (KafkaStreams streams = new KafkaStreams(builder.build(), config)) {
-            streams.start();
-        }
+        KafkaStreams streams = new KafkaStreams(builder.build(), config);
+        streams.start();
+        System.out.println(streams);
+        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
     }
 }
