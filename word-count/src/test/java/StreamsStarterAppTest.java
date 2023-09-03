@@ -38,6 +38,33 @@ class StreamsStarterAppTest {
         testDriver.close();
     }
 
+    @Test
+    public void makeSureCountsAreCorrect(){
+        String firstExample = "testing Kafka Streams";
+        pushNewInputRecord(firstExample);
+        verifyKeyAndValue(readOutput(), "testing", 1L);
+        verifyKeyAndValue(readOutput(), "kafka", 1L);
+        verifyKeyAndValue(readOutput(), "streams", 1L);
+        assertTrue(outputTopic.isEmpty());
+
+        String secondExample = "testing Kafka again";
+        pushNewInputRecord(secondExample);
+        verifyKeyAndValue(readOutput(), "testing", 2L);
+        verifyKeyAndValue(readOutput(), "kafka", 2L);
+        verifyKeyAndValue(readOutput(), "again", 1L);
+        assertTrue(outputTopic.isEmpty());
+    }
+
+    @Test
+    public void makeSureWordsBecomeLowercase(){
+        String upperCaseString = "KAFKA kafka Kafka";
+        pushNewInputRecord(upperCaseString);
+        verifyKeyAndValue(readOutput(), "kafka", 1L);
+        verifyKeyAndValue(readOutput(), "kafka", 2L);
+        verifyKeyAndValue(readOutput(), "kafka", 3L);
+        assertTrue(outputTopic.isEmpty());
+    }
+
     public void pushNewInputRecord(String value){
         inputTopic.pipeInput(value);
     }
@@ -46,54 +73,8 @@ class StreamsStarterAppTest {
         return outputTopic.readRecord();
     }
 
-    @Test
-    public void makeSureCountsAreCorrect(){
-        String firstExample = "testing Kafka Streams";
-        pushNewInputRecord(firstExample);
-        TestRecord<String, Long> firstInput = readOutput();
-        assertEquals("testing", firstInput.getKey());
-        assertEquals(1L, firstInput.getValue());
-
-        TestRecord<String, Long> second = readOutput();
-        assertEquals("kafka", second.getKey());
-        assertEquals(1L, second.getValue());
-
-        TestRecord<String, Long> third = readOutput();
-        assertEquals("streams", third.getKey());
-        assertEquals(1L, third.getValue());
-        assertTrue(outputTopic.isEmpty());
-
-        String secondExample = "testing Kafka again";
-        pushNewInputRecord(secondExample);
-        TestRecord<String, Long> fourth = readOutput();
-        assertEquals("testing", fourth.getKey());
-        assertEquals(2L, fourth.getValue());
-
-        TestRecord<String, Long> fifth = readOutput();
-        assertEquals("kafka", fifth.getKey());
-        assertEquals(2L, fifth.getValue());
-
-        TestRecord<String, Long> sixth = readOutput();
-        assertEquals("again", sixth.getKey());
-        assertEquals(1L, sixth.getValue());
-        assertTrue(outputTopic.isEmpty());
+    private static void verifyKeyAndValue(TestRecord<String, Long> firstInput, String expectedKey, long expectedValue) {
+        assertEquals(expectedKey, firstInput.getKey());
+        assertEquals(expectedValue, firstInput.getValue());
     }
-
-    @Test
-    public void makeSureWordsBecomeLowercase(){
-        String upperCaseString = "KAFKA kafka Kafka";
-        pushNewInputRecord(upperCaseString);
-        TestRecord<String, Long> first = readOutput();
-        assertEquals("kafka", first.getKey());
-        assertEquals(1L, first.getValue());
-
-        TestRecord<String, Long> second = readOutput();
-        assertEquals("kafka", second.getKey());
-        assertEquals(2L, second.getValue());
-
-        TestRecord<String, Long> third = readOutput();
-        assertEquals("kafka", third.getKey());
-        assertEquals(3L, third.getValue());
-    }
-
 }
