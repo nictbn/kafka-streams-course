@@ -12,6 +12,7 @@
         <module>word-count</module>
         <module>favourite-color</module>
         <module>bank-balance-exactly-once</module>
+        <module>user-event-enricher</module>
     </modules>
 
     <properties>
