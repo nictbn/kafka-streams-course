@@ -20,7 +20,7 @@ public class FavouriteColor {
 
     public static void main(String[] args) {
         Properties config = new Properties();
-        config.put(StreamsConfig.APPLICATION_ID_CONFIG, "favourite color");
+        config.put(StreamsConfig.APPLICATION_ID_CONFIG, "favourite-color");
         config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         config.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
@@ -42,6 +42,7 @@ public class FavouriteColor {
         favouriteColors.toStream().to(FAVOURITE_COLOR_OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Long()));
 
         KafkaStreams stream = new KafkaStreams(builder.build(), config);
+        stream.cleanUp();
         stream.start();
 
         System.out.println(stream);
